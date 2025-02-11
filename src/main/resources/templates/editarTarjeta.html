@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+
+<head>
+    <title>Editar Tarjeta</title>
+    <!-- Vinculamos Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJ0KHg0c9jJ6H27LeNU5yG0Y2vduyM4CBj6e2tpfFvS5BKHm2bxEXp6KkkmT" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+        }
+        h2 {
+            text-align: center;
+            color: #495057;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .btn-submit {
+            width: 100%;
+        }
+        .btn-back {
+            margin-top: 20px;
+            text-align: center;
+            display: block;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container">
+        <h2>Editar Tarjeta</h2>
+
+        <!-- Formulario de edición de tarjeta -->
+        <form th:action="@{/tarjetas/guardar}" th:object="${tarjeta}" method="post">
+            <div class="form-group">
+                <label for="pregunta">Pregunta</label>
+                <input type="text" id="pregunta" th:field="*{pregunta}" class="form-control" placeholder="Ingrese la pregunta" required />
+            </div>
+
+            <div class="form-group">
+                <label for="respuesta">Respuesta</label>
+                <input type="text" id="respuesta" th:field="*{respuesta}" class="form-control" placeholder="Ingrese la respuesta" required />
+            </div>
+
+            <button type="submit" class="btn btn-success btn-submit">Guardar Cambios</button>
+        </form>
+
+        <!-- Botón para volver a la lista -->
+        <a href="/tarjetas" class="btn btn-secondary btn-back">Volver a la lista de tarjetas</a>
+    </div>
+
+    <!-- Vinculamos el script de Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fo9Q8vRZ5c8qTeRWB2fbfFTWbBoG0kmzK0yE0hB3doMwRU7p6fA3gbk9g8de6Kkbi" crossorigin="anonymous"></script>
+</body>
+
+</html>

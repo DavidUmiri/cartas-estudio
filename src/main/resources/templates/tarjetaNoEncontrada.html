@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title>Tarjeta No Encontrada</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <h2 class="text-center text-danger">❌ Tarjeta No Encontrada</h2>
+        <p class="text-center">Lo sentimos, la tarjeta que buscas no existe.</p>
+        <div class="text-center">
+            <a href="/tarjetas" class="btn btn-primary">⬅️ Volver a Tarjetas</a>
+        </div>
+    </div>
+</body>
+</html>

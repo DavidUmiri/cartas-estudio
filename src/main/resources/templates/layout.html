@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE - App de Estudio">App de Estudio</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+
+<body>
+
+    <!-- 📌 Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/tarjetas">📚 App de Estudio</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/tarjetas">Tarjetas</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 📌 Contenido dinámico -->
+    <main class="container mt-4">
+        <div layout:fragment="content">
+            <!-- Aquí se inyectará el contenido de otras vistas -->
+        </div>
+    </main>
+
+    <!-- 📌 Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-4">
+        <p>&copy; 2025 App de Estudio - Todos los derechos reservados</p>
+    </footer>
+
+</body>
+</html>
