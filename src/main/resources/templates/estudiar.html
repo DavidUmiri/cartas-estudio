@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Estudiar</title>
+    <style>
+        .study-container {
+            display: grid;
+            grid-template-columns: minmax(300px, 45%) 1fr;
+            gap: 2rem;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        .flashcard-section {
+            position: sticky;
+            top: 2rem;
+        }
+
+        .study-card {
+            height: 400px;
+            margin: 0 auto;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .study-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .study-card.flipped .study-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .study-card-front, .study-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            border-radius: 20px;
+        }
+
+        .study-card-front {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            border: 2px solid var(--primary-color);
+        }
+
+        .study-card-back {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            transform: rotateY(180deg);
+            color: white;
+        }
+
+        .card-content {
+            font-size: 1.5rem;
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .navigation-controls {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress-section {
+            text-align: center;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        .cards-list {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .card-item {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+
+        .card-item.active {
+            background: rgba(67, 97, 238, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .card-item:hover {
+            transform: translateX(5px);
+        }
+
+        .card-item-title {
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-hint {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        @media (max-width: 992px) {
+            .study-container {
+                grid-template-columns: 1fr;
+            }
+
+            .flashcard-section {
+                position: static;
+                margin-bottom: 2rem;
+            }
+
+            .study-card {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div th:if="${#lists.isEmpty(tarjetas)}" class="text-center">
+            <div class="empty-state">
+                <h3>📚 No hay tarjetas para estudiar</h3>
+                <p class="text-muted">Crea algunas tarjetas primero para comenzar a estudiar</p>
+                <a href="/tarjetas" class="btn btn-primary mt-3">✨ Crear Tarjetas</a>
+            </div>
+        </div>
+
+        <div th:if="${not #lists.isEmpty(tarjetas)}" class="study-container">
+            <!-- Sección Izquierda: Tarjeta de Estudio -->
+            <div class="flashcard-section">
+                <div class="progress-section">
+                    <h4>Progreso de Estudio</h4>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" th:style="'width: ' + ${(posicionActual + 1) * 100 / totalTarjetas} + '%'"></div>
+                    </div>
+                    <p class="mb-0">
+                        <span class="badge bg-primary" th:text="${posicionActual + 1} + ' de ' + ${totalTarjetas}">
+                            1 de 10
+                        </span>
+                    </p>
+                </div>
+
+                <div class="study-card" onclick="this.classList.toggle('flipped')">
+                    <div class="study-card-inner">
+                        <div class="study-card-front">
+                            <div class="card-content" th:text="${tarjetaActual.pregunta}">Pregunta</div>
+                        </div>
+                        <div class="study-card-back">
+                            <div class="card-content" th:text="${tarjetaActual.respuesta}">Respuesta</div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="card-hint">🔄 Click en la tarjeta para ver la respuesta</p>
+
+                <div class="navigation-controls">
+                    <a th:if="${!esPrimera}" th:href="@{/tarjetas/estudiar(anterior)}" 
+                       class="btn btn-outline-primary">
+                        ⬅️ Anterior
+                    </a>
+                    <div th:if="${esPrimera}" style="width: 120px;"></div>
+
+                    <a th:if="${!esUltima}" th:href="@{/tarjetas/estudiar(siguiente)}" 
+                       class="btn btn-primary">
+                        Siguiente ➡️
+                    </a>
+                    <a th:if="${esUltima}" th:href="@{/tarjetas}" 
+                       class="btn btn-success">
+                        ¡Terminar! 🎉
+                    </a>
+                </div>
+            </div>
+
+            <!-- Sección Derecha: Lista de Tarjetas -->
+            <div class="cards-list">
+                <h4 class="mb-4">📚 Todas las Tarjetas</h4>
+                <div th:each="tarjeta, iterStat : ${tarjetas}" 
+                     th:class="${iterStat.index == posicionActual ? 'card-item active' : 'card-item'}">
+                    <div class="card-item-title" th:text="${tarjeta.pregunta}">Pregunta</div>
+                    <small class="text-muted" th:text="${#strings.abbreviate(tarjeta.respuesta, 50)}">Respuesta</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

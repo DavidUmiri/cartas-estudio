@@ -2,50 +2,238 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
 <head>
     <title>Lista de Tarjetas</title>
+    <style>
+        .split-container {
+            display: grid;
+            grid-template-columns: 40% 60%;
+            gap: 2rem;
+            margin: 0 auto;
+        }
+
+        .card-form {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            position: sticky;
+            top: 2rem;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 0.8rem;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #2b2d42;
+            margin-bottom: 0.5rem;
+        }
+
+        .table-section {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 1rem;
+        }
+
+        .table {
+            margin-bottom: 0;
+            width: 100%;
+        }
+
+        .table thead th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            padding: 1rem;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .btn-group-card {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn-group-card .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50%;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .empty-state h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .study-button-container {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(63, 55, 201, 0.1));
+            padding: 1rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+        }
+
+        .study-button {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-weight: 600;
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .study-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.35);
+        }
+
+        @media (max-width: 992px) {
+            .split-container {
+                grid-template-columns: 1fr;
+            }
+
+            .card-form {
+                position: static;
+                margin-bottom: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .btn-group-card {
+                flex-direction: column;
+            }
+
+            .btn-group-card .btn {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <div layout:fragment="content">
-        <!-- Formulario para crear una nueva tarjeta -->
-        <h2 class="text-center">Nueva Tarjeta</h2>
+        <div class="split-container">
+            <!-- Sección Izquierda: Formulario para crear una nueva tarjeta -->
+            <section>
+                <div class="card-form">
+                    <h2 class="section-title">📝 Nueva Tarjeta</h2>
+                    <form th:action="@{/tarjetas/guardar}" th:object="${tarjeta}" method="post">
+                        <div class="mb-4">
+                            <label class="form-label">📋 Pregunta:</label>
+                            <input type="text" class="form-control" th:field="*{pregunta}" 
+                                   required placeholder="Escribe tu pregunta aquí...">
+                        </div>
 
-        <form th:action="@{/tarjetas/guardar}" th:object="${tarjeta}" method="post">
-            <div class="mb-3">
-                <label class="form-label">Pregunta:</label>
-                <input type="text" class="form-control" th:field="*{pregunta}" required>
-            </div>
+                        <div class="mb-4">
+                            <label class="form-label">✨ Respuesta:</label>
+                            <input type="text" class="form-control" th:field="*{respuesta}" 
+                                   required placeholder="Escribe la respuesta aquí...">
+                        </div>
 
-            <div class="mb-3">
-                <label class="form-label">Respuesta:</label>
-                <input type="text" class="form-control" th:field="*{respuesta}" required>
-            </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success">
+                                💾 Guardar Tarjeta
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
 
-            <div class="text-center">
-                <button type="submit" class="btn btn-success w-100">💾 Guardar</button>
-            </div>
-        </form>
+            <!-- Sección Derecha: Lista de tarjetas -->
+            <section>
+                <h2 class="section-title">📚 Mis Tarjetas</h2>
 
-        <!-- Lista de tarjetas -->
-        <h2 class="text-center mt-5">Lista de Tarjetas</h2>
+                <div th:if="${#lists.isEmpty(tarjetas)}" class="empty-state">
+                    <h3>🎯 ¡Comienza tu Aprendizaje!</h3>
+                    <p class="text-muted">Crea tu primera tarjeta usando el formulario de la izquierda</p>
+                </div>
 
-        <table class="table table-bordered text-center">
-            <thead class="table-dark">
-                <tr>
-                    <th>Pregunta</th>
-                    <th>Respuesta</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="tarjeta : ${tarjetas}">
-                    <td th:text="${tarjeta.pregunta}"></td>
-                    <td th:text="${tarjeta.respuesta}"></td>
-                    <td>
-                        <a th:href="@{/tarjetas/editar/{id}(id=${tarjeta.id})}" class="btn btn-warning">✏️ Editar</a>
-                        <a th:href="@{/tarjetas/eliminar/{id}(id=${tarjeta.id})}" class="btn btn-danger">🗑️ Eliminar</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                <div th:if="${not #lists.isEmpty(tarjetas)}">
+                    <div class="study-button-container text-center">
+                        <a href="/tarjetas/estudiar" class="btn study-button">
+                            🎯 Comenzar Sesión de Estudio
+                        </a>
+                    </div>
+
+                    <div class="table-section">
+                        <div class="table-wrapper">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Pregunta</th>
+                                        <th>Respuesta</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="tarjeta : ${tarjetas}">
+                                        <td th:text="${tarjeta.pregunta}"></td>
+                                        <td th:text="${tarjeta.respuesta}"></td>
+                                        <td>
+                                            <div class="btn-group-card">
+                                                <a th:href="@{/tarjetas/editar/{id}(id=${tarjeta.id})}" 
+                                                   class="btn btn-warning">
+                                                    ✏️ Editar
+                                                </a>
+                                                <a th:href="@{/tarjetas/eliminar/{id}(id=${tarjeta.id})}" 
+                                                   class="btn btn-danger"
+                                                   onclick="return confirm('¿Estás seguro de que deseas eliminar esta tarjeta?')">
+                                                    🗑️ Eliminar
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 </body>
 </html>

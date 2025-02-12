@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpSession;
+import java.util.List;
 
 @Controller
 @RequestMapping("/tarjetas")
@@ -71,5 +73,44 @@ public class TarjetaController {
             logger.error("Intento fallido de editar tarjeta con ID {}: {}", id, e.getMessage());
             return "tarjetaNoEncontrada"; // Vista de error
         }
+    }
+
+    @GetMapping("/estudiar")
+    public String estudiar(
+            @RequestParam(required = false) String siguiente,
+            @RequestParam(required = false) String anterior,
+            Model model,
+            HttpSession session) {
+        
+        List<Tarjeta> tarjetas = tarjetaService.obtenerTodas();
+        
+        if (tarjetas.isEmpty()) {
+            return "estudiar";
+        }
+
+        // Obtener o inicializar el índice de la tarjeta actual
+        Integer indiceActual = (Integer) session.getAttribute("indiceEstudio");
+        if (indiceActual == null) {
+            indiceActual = 0;
+        } else {
+            if (siguiente != null && indiceActual < tarjetas.size() - 1) {
+                indiceActual++;
+            } else if (anterior != null && indiceActual > 0) {
+                indiceActual--;
+            }
+        }
+
+        // Guardar el índice actual en la sesión
+        session.setAttribute("indiceEstudio", indiceActual);
+
+        // Preparar el modelo
+        model.addAttribute("tarjetaActual", tarjetas.get(indiceActual));
+        model.addAttribute("esPrimera", indiceActual == 0);
+        model.addAttribute("esUltima", indiceActual == tarjetas.size() - 1);
+        model.addAttribute("posicionActual", indiceActual);
+        model.addAttribute("totalTarjetas", tarjetas.size());
+        model.addAttribute("tarjetas", tarjetas);
+
+        return "estudiar";
     }
 }
