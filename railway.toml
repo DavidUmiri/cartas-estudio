@@ -3,7 +3,7 @@ builder = "nixpacks"
 buildCommand = "./mvnw clean package -DskipTests && cp target/cartas-estudio.jar app.jar"
 
 [deploy]
-startCommand = "java -Dserver.port=$PORT -jar app.jar --spring.profiles.active=railway"
+startCommand = "java $JAVA_OPTS -jar app.jar --spring.profiles.active=railway --server.port=$PORT"
 restartPolicyType = "ON_FAILURE"
 
 [[services]]
