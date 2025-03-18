@@ -5,6 +5,6 @@ phases:
       - mvn clean package -DskipTests
 artifacts:
   files:
-    - target/recordatorios-0.0.1-SNAPSHOT.jar
+    - target/cartas-estudio.jar
     - .ebextensions/**/*
     - Procfile

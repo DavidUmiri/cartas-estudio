@@ -3,13 +3,14 @@ builder = "nixpacks"
 buildCommand = "./mvnw clean package -DskipTests"
 
 [deploy]
-startCommand = "java -XX:+UseContainerSupport -XX:MaxRAMPercentage=75 -Dserver.port=$PORT -jar target/cartas-estudio.jar --spring.profiles.active=railway"
+startCommand = "java -jar target/cartas-estudio.jar --spring.profiles.active=railway"
 restartPolicyType = "ON_FAILURE"
 
 [[services]]
 name = "web"
 protocol = "tcp"
 internal_port = 8080
+healthcheck = {path = "/actuator/health", interval = "15s", timeout = "5s"}
 
 [env]
-JAVA_OPTS = "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75 -Dserver.port=$PORT"
+JAVA_OPTS = "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75"
