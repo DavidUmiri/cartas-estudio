@@ -1,1 +1,1 @@
-web: java -XX:+UseContainerSupport -XX:MaxRAMPercentage=75 -Dserver.port=$PORT -jar target/cartas-estudio.jar --spring.profiles.active=railway
+web: java -XX:+UseContainerSupport -XX:MaxRAMPercentage=75 -Xmx512m -jar target/cartas-estudio.jar --spring.profiles.active=railway --server.port=$PORT
