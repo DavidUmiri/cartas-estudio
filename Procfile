@@ -1,1 +1,1 @@
-web: java -Dserver.port=$PORT -jar target/cartas-estudio-0.0.1-SNAPSHOT.jar --spring.profiles.active=railway
+web: java -Dserver.port=$PORT $JAVA_OPTS -jar target/cartas-estudio-0.0.1-SNAPSHOT.jar --spring.profiles.active=railway
