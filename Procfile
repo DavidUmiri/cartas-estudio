@@ -1,1 +1,1 @@
-web: java -Dserver.port=5000 -jar app.jar --spring.profiles.active=prod
+web: java -Dserver.port=$PORT -jar target/*.jar --spring.profiles.active=railway

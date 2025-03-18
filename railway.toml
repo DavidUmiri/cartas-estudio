@@ -1,0 +1,12 @@
+[build]
+builder = "MAVEN"
+buildCommand = "mvn clean package -DskipTests"
+
+[deploy]
+startCommand = "java -Dserver.port=$PORT -jar target/*.jar --spring.profiles.active=railway"
+restartPolicyType = "ON_FAILURE"
+
+[[services]]
+name = "web"
+protocol = "tcp"
+internal_port = 8080
