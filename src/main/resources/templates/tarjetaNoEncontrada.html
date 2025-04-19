@@ -1,19 +1,109 @@
 <!DOCTYPE html>
-<html lang="es"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}">
-
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
 <head>
     <title>Tarjeta No Encontrada</title>
-</head>
+    <style>
+        .error-container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 3rem 2rem;
+            animation: fadeIn 0.5s ease;
+        }
 
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .error-card {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+
+        .error-title {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            color: #6c757d;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .error-container {
+                padding: 2rem 1rem;
+            }
+
+            .error-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
 <body>
     <div layout:fragment="content">
-        <h2 class="text-center text-danger">❌ Tarjeta No Encontrada</h2>
-        <p class="text-center">Lo sentimos, la tarjeta que buscas no existe.</p>
-        <div class="text-center">
-            <a href="/tarjetas" class="btn btn-primary">⬅️ Volver a Tarjetas</a>
+        <div class="error-container">
+            <div class="error-card">
+                <i class="bi bi-search error-icon"></i>
+                <h1 class="error-title">¡Ups! Tarjeta no encontrada</h1>
+                <p class="error-message">
+                    Lo sentimos, pero la tarjeta que estás buscando no existe o no tienes acceso a ella.
+                    Puede que haya sido eliminada o que la URL no sea correcta.
+                </p>
+                <div class="error-actions">
+                    <a href="/tarjetas" class="btn btn-primary">
+                        <i class="bi bi-card-text"></i>
+                        Ver mis tarjetas
+                    </a>
+                    <a href="/tarjetas" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i>
+                        Crear nueva tarjeta
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </body>

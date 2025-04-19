@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 
 <head>
     <meta charset="UTF-8">
@@ -9,6 +10,7 @@
     <title layout:title-pattern="$CONTENT_TITLE - App de Estudio">App de Estudio</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <style>
         :root {
             --primary-color: #4361ee;
@@ -18,6 +20,7 @@
             --danger-color: #ef476f;
             --light-bg: #f8f9fa;
             --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
         }
 
         body {
@@ -32,41 +35,60 @@
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             box-shadow: var(--card-shadow);
             padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .navbar-brand {
             font-size: 1.5rem;
             font-weight: 700;
             color: white !important;
+            transition: var(--transition);
+        }
+
+        .navbar-brand:hover {
+            transform: translateY(-2px);
         }
 
         .nav-link {
             color: rgba(255, 255, 255, 0.9) !important;
             font-weight: 500;
-            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: var(--transition);
         }
 
-        .nav-link:hover {
+        .nav-link:hover, .nav-link.active {
             color: white !important;
+            background: rgba(255, 255, 255, 0.1);
             transform: translateY(-2px);
         }
 
         main {
             flex: 1;
+            padding: 2rem 0;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem 1rem;
+            padding: 0 1rem;
         }
 
         .btn {
             border-radius: 10px;
             padding: 0.6rem 1.5rem;
             font-weight: 500;
-            transition: all 0.3s ease;
+            transition: var(--transition);
             border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn i {
+            font-size: 1.1em;
         }
 
         .btn:hover {
@@ -75,107 +97,87 @@
         }
 
         .btn-primary {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
         }
 
         .btn-success {
-            background-color: var(--success-color);
+            background: var(--success-color);
         }
 
         .btn-warning {
-            background-color: var(--warning-color);
+            background: var(--warning-color);
             color: #2b2d42;
         }
 
         .btn-danger {
-            background-color: var(--danger-color);
+            background: var(--danger-color);
         }
 
-        .table {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 2rem;
-        }
-
-        .table th {
-            background-color: var(--primary-color);
-            color: white;
-            font-weight: 600;
-            border: none;
-        }
-
-        .table td {
-            vertical-align: middle;
-            padding: 1rem;
-        }
-
-        .study-card {
-            perspective: 1000px;
-            height: 300px;
-            cursor: pointer;
-            margin: 2rem auto;
-            max-width: 600px;
-        }
-
-        .study-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-        }
-
-        .study-card.flipped .study-card-inner {
-            transform: rotateY(180deg);
-        }
-
-        .study-card-front, .study-card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            display: flex;
+        .nav-user {
+            color: white !important;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-right: 1rem;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: var(--card-shadow);
-            background: white;
+            gap: 0.5rem;
         }
 
-        .study-card-front {
-            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            color: white !important;
+            border-radius: 10px;
+            padding: 0.5rem 1rem;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .study-card-back {
-            transform: rotateY(180deg);
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        }
-
-        .card-text {
-            font-size: 1.5rem;
-            font-weight: 500;
-            color: #2b2d42;
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
 
         footer {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             padding: 1.5rem 0;
-            margin-top: 3rem;
+            margin-top: auto;
         }
 
         @media (max-width: 768px) {
-            .container {
+            .navbar-nav {
+                background: rgba(255, 255, 255, 0.05);
                 padding: 1rem;
+                border-radius: 10px;
+                margin-top: 1rem;
             }
-            
-            .btn {
-                padding: 0.5rem 1rem;
+
+            .nav-user, .btn-logout {
+                margin: 0.5rem 0;
+                width: 100%;
+                justify-content: center;
             }
+
+            .container {
+                padding: 0 1rem;
+            }
+        }
+
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+
+        .loading .loading-spinner {
+            display: block;
         }
     </style>
 </head>
@@ -183,18 +185,52 @@
 <body>
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="/tarjetas">📚 App de Estudio</a>
+            <a class="navbar-brand" href="/tarjetas">
+                <i class="bi bi-book"></i> App de Estudio
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/tarjetas">Tarjetas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/tarjetas/estudiar">Estudiar</a></li>
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" href="/tarjetas">
+                            <i class="bi bi-card-text"></i> Tarjetas
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" href="/tarjetas/estudiar">
+                            <i class="bi bi-mortarboard"></i> Estudiar
+                        </a>
+                    </li>
                 </ul>
+                <div class="d-flex align-items-center">
+                    <div sec:authorize="isAuthenticated()">
+                        <span class="nav-user">
+                            <i class="bi bi-person-circle"></i>
+                            <span sec:authentication="name"></span>
+                        </span>
+                        <a href="/logout" class="btn-logout">
+                            <i class="bi bi-box-arrow-right"></i>
+                            Cerrar Sesión
+                        </a>
+                    </div>
+                    <div sec:authorize="!isAuthenticated()">
+                        <a href="/login" class="nav-link">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            Iniciar Sesión
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
+
+    <div class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
 
     <main>
         <div class="container">
@@ -204,11 +240,25 @@
         </div>
     </main>
 
-    <footer class="text-center">
-        <p class="mb-0">&copy; 2025 App de Estudio - Todos los derechos reservados</p>
+    <footer>
+        <div class="container">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2025 App de Estudio - Todos los derechos reservados</p>
+            </div>
+        </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mostrar spinner de carga en navegación
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A' && !e.target.getAttribute('download')) {
+                    document.body.classList.add('loading');
+                }
+            });
+        });
+    </script>
     <th:block layout:fragment="scripts"></th:block>
 </body>
 </html>
