@@ -1,497 +1,863 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
-<head>
+<html
+  lang="es"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout}"
+>
+  <head>
     <title>Lista de Tarjetas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
+      /* Estilos base */
+      :root {
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+        --primary-color: #4361ee;
+        --secondary-color: #3f37c9;
+      }
+
+      /* Contenedor principal para mejor control del flujo */
+      .content-container {
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 15px;
+        box-sizing: border-box;
+      }
+
+      .split-container {
+        display: grid;
+        grid-template-columns: minmax(300px, 1fr) minmax(300px, 2fr);
+        gap: 2rem;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* Contenedores de secciones */
+      .card-form-container,
+      .card-list-container {
+        width: 100%;
+        box-sizing: border-box;
+        overflow: hidden; /* Previene desbordamientos */
+      }
+
+      .card-form {
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        position: sticky;
+        top: 2rem;
+        animation: slideIn 0.5s ease;
+        width: 100%;
+        box-sizing: border-box;
+        height: auto;
+        max-width: 100%; /* Asegura que no exceda el ancho del contenedor */
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .form-control {
+        border-radius: 10px;
+        padding: 0.8rem;
+        border: 2px solid #e9ecef;
+        transition: var(--transition);
+        background: white;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+      }
+
+      .form-label {
+        font-weight: 500;
+        color: #2b2d42;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .table-section {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        animation: slideIn 0.5s ease 0.2s backwards;
+        width: 100%;
+        box-sizing: border-box;
+        max-width: 100%; /* Asegura que no exceda el ancho del contenedor */
+      }
+
+      .table-wrapper {
+        overflow-x: auto;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.5rem;
+        -webkit-overflow-scrolling: touch; /* Mejora el scroll en dispositivos táctiles */
+      }
+
+      .table {
+        margin-bottom: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        min-width: 600px;
+      }
+
+      .table thead th {
+        background: var(--primary-color);
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+
+      .table tbody tr {
+        transition: var(--transition);
+        border-bottom: 1px solid #e9ecef;
+      }
+
+      .table tbody tr:hover {
+        background-color: rgba(67, 97, 238, 0.05);
+        transform: translateX(5px);
+      }
+
+      .table td {
+        padding: 1rem;
+        vertical-align: middle;
+        word-break: break-word;
+      }
+
+      .btn-group-card {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        border: none;
+        white-space: nowrap;
+      }
+
+      .btn-primary {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .btn-success {
+        background: #4bb543;
+        color: white;
+      }
+
+      .btn-warning {
+        background: #f9c74f;
+        color: #333;
+      }
+
+      .btn-danger {
+        background: #ef476f;
+        color: white;
+      }
+
+      .section-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .section-title::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 50%;
+        height: 3px;
+        background: linear-gradient(
+          to right,
+          var(--primary-color),
+          transparent
+        );
+        border-radius: 2px;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        animation: slideIn 0.5s ease;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .empty-state h3 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+      }
+
+      .study-button-container {
+        background: linear-gradient(
+          135deg,
+          rgba(67, 97, 238, 0.1),
+          rgba(63, 55, 201, 0.1)
+        );
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        animation: slideIn 0.5s ease;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .study-button {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        color: white;
+        font-weight: 600;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .study-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.35);
+      }
+
+      .card-stats {
+        background: white;
+        border-radius: 15px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-around;
+        box-shadow: var(--card-shadow);
+        animation: slideIn 0.5s ease 0.1s backwards;
+        flex-wrap: wrap;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .stat-item {
+        text-align: center;
+        padding: 0.5rem;
+        flex: 1 1 150px;
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+      }
+
+      .shake {
+        animation: shake 0.5s ease-in-out;
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .stat-icon {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+      }
+
+      .recomendacion {
+        background: linear-gradient(
+          135deg,
+          rgba(67, 97, 238, 0.1),
+          rgba(63, 55, 201, 0.1)
+        );
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        animation: slideIn 0.5s ease;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .recomendacion-texto {
+        color: var(--primary-color);
+        font-weight: 500;
+        margin-bottom: 1rem;
+      }
+
+      .alert {
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        animation: slideIn 0.5s ease;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .alert-success {
+        background: rgba(75, 181, 67, 0.1);
+        color: #4bb543;
+        border: 1px solid rgba(75, 181, 67, 0.2);
+      }
+
+      .alert-warning {
+        background: rgba(249, 199, 79, 0.1);
+        color: #f9c74f;
+        border: 1px solid rgba(249, 199, 79, 0.2);
+      }
+
+      .alert-danger {
+        background: rgba(239, 71, 111, 0.1);
+        color: #ef476f;
+        border: 1px solid rgba(239, 71, 111, 0.2);
+      }
+
+      .badge {
+        padding: 0.3rem 0.6rem;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: white;
+      }
+
+      .bg-danger {
+        background-color: #ef476f;
+      }
+
+      .bg-warning {
+        background-color: #f9c74f;
+      }
+
+      .bg-success {
+        background-color: #4bb543;
+      }
+
+      .text-muted {
+        color: #6c757d;
+      }
+
+      .text-center {
+        text-align: center;
+      }
+
+      .mb-4 {
+        margin-bottom: 1.5rem;
+      }
+
+      /* Estilos responsive específicos para los contenedores */
+      @media (max-width: 1200px) {
+        .stats-grid {
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        }
+      }
+
+      @media (max-width: 992px) {
         .split-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin: 0 auto;
+          grid-template-columns: 1fr; /* Cambia a una columna */
+          gap: 1.5rem; /* Reduce el espacio entre elementos */
         }
 
         .card-form {
-            background: linear-gradient(135deg, #ffffff, #f8f9fa);
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: var(--card-shadow);
-            position: sticky;
-            top: 2rem;
-            animation: slideIn 0.5s ease;
+          position: static;
+          margin-bottom: 1.5rem;
+          max-height: none;
+          padding: 1.5rem; /* Reduce el padding */
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .card-form-container,
+        .card-list-container {
+          width: 100%;
+          max-width: 100%; /* Asegura que no exceda el ancho del contenedor */
+        }
+      }
+
+      @media (max-width: 768px) {
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
         }
 
-        .form-control {
-            border-radius: 10px;
-            padding: 0.8rem;
-            border: 2px solid #e9ecef;
-            transition: var(--transition);
-            background: white;
+        .content-container {
+          padding: 0 10px;
         }
 
-        .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
-        }
-
-        .form-label {
-            font-weight: 500;
-            color: #2b2d42;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .table-section {
-            background: white;
-            border-radius: 20px;
-            box-shadow: var(--card-shadow);
-            overflow: hidden;
-            animation: slideIn 0.5s ease 0.2s backwards;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-            margin: 1rem;
-        }
-
-        .table {
-            margin-bottom: 0;
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        .table thead th {
-            background: var(--primary-color);
-            color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-            padding: 1rem;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
-
-        .table tbody tr {
-            transition: var(--transition);
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .table tbody tr:last-child {
-            border-bottom: none;
-        }
-
-        .table tbody tr:hover {
-            background-color: rgba(67, 97, 238, 0.05);
-            transform: translateX(5px);
-        }
-
+        .table thead th,
         .table td {
-            padding: 1rem;
-            vertical-align: middle;
+          padding: 0.75rem 0.5rem;
+          font-size: 0.9rem;
         }
 
         .btn-group-card {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: flex-end;
+          flex-direction: column;
+        }
+
+        .btn-group-card .btn {
+          width: 100%;
+          justify-content: center;
+          padding: 0.5rem;
+          font-size: 0.9rem;
+        }
+
+        .btn {
+          padding: 0.5rem 0.75rem;
+          font-size: 0.9rem;
+        }
+
+        .card-form {
+          padding: 1.25rem; /* Ajustado para más espacio */
         }
 
         .section-title {
-            color: var(--primary-color);
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
+          font-size: 1.3rem;
         }
 
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 50%;
-            height: 3px;
-            background: linear-gradient(to right, var(--primary-color), transparent);
-            border-radius: 2px;
+        /* Ajustamos el input y textarea para móviles */
+        .form-control {
+          font-size: 0.95rem;
         }
+      }
 
-        .empty-state {
-            text-align: center;
-            padding: 3rem 2rem;
-            background: linear-gradient(135deg, #ffffff, #f8f9fa);
-            border-radius: 20px;
-            box-shadow: var(--card-shadow);
-            animation: slideIn 0.5s ease;
-        }
-
-        .empty-state h3 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .study-button-container {
-            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(63, 55, 201, 0.1));
-            padding: 1.5rem;
-            border-radius: 15px;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            animation: slideIn 0.5s ease;
-        }
-
-        .study-button {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            font-weight: 600;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .study-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.35);
-        }
-
-        .card-stats {
-            background: white;
-            border-radius: 15px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            justify-content: space-around;
-            box-shadow: var(--card-shadow);
-            animation: slideIn 0.5s ease 0.1s backwards;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        .stat-label {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 992px) {
-            .split-container {
-                grid-template-columns: 1fr;
-            }
-
-            .card-form {
-                position: static;
-                margin-bottom: 2rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .btn-group-card {
-                flex-direction: column;
-            }
-
-            .btn-group-card .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .table td {
-                min-width: 200px;
-            }
-
-            .table td:last-child {
-                min-width: 120px;
-            }
-        }
-
-        .shake {
-            animation: shake 0.5s ease-in-out;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
+      @media (max-width: 576px) {
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
+          grid-template-columns: 1fr;
+        }
+
+        .split-container {
+          grid-template-columns: 1fr;
+          gap: 1rem;
         }
 
         .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: var(--card-shadow);
-            transition: var(--transition);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
+          padding: 1rem;
         }
 
         .stat-icon {
-            font-size: 2rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
+          font-size: 1.5rem;
+          margin-bottom: 0.5rem;
         }
 
         .stat-value {
-            font-size: 2rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
+          font-size: 1.5rem;
         }
 
-        .stat-label {
-            color: #6c757d;
-            font-size: 0.9rem;
+        .form-control {
+          padding: 0.6rem;
+          font-size: 0.9rem; /* Texto más pequeño para móvil */
         }
 
-        .recomendacion {
-            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(63, 55, 201, 0.1));
-            padding: 1.5rem;
-            border-radius: 15px;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            animation: slideIn 0.5s ease;
+        .table thead th,
+        .table td {
+          padding: 0.6rem 0.4rem;
+          font-size: 0.85rem;
         }
 
-        .recomendacion-texto {
-            color: var(--primary-color);
-            font-weight: 500;
-            margin-bottom: 1rem;
+        .alert,
+        .recomendacion,
+        .card-form,
+        .table-section {
+          padding: 1rem;
+          border-radius: 15px; /* Reducimos el radio para móviles */
+          width: 100%;
+          max-width: 100%; /* Crítico: asegura que no se desborde */
+          overflow: hidden; /* Previene desbordamientos */
+          box-sizing: border-box;
         }
 
-        .alert {
-            padding: 1rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            animation: slideIn 0.5s ease;
+        .btn {
+          padding: 0.4rem 0.6rem;
+          font-size: 0.85rem;
         }
 
-        .alert-success {
-            background: rgba(75, 181, 67, 0.1);
-            color: #4bb543;
-            border: 1px solid rgba(75, 181, 67, 0.2);
+        .empty-state {
+          padding: 2rem 1rem;
         }
 
-        .alert-warning {
-            background: rgba(249, 199, 79, 0.1);
-            color: #f9c74f;
-            border: 1px solid rgba(249, 199, 79, 0.2);
+        .empty-state h3 {
+          font-size: 1.2rem;
         }
 
-        .alert-danger {
-            background: rgba(239, 71, 111, 0.1);
-            color: #ef476f;
-            border: 1px solid rgba(239, 71, 111, 0.2);
+        /* Reducimos los márgenes para aprovechar el espacio */
+        .mb-4 {
+          margin-bottom: 1rem;
         }
+      }
+
+      @media (max-width: 400px) {
+        .content-container {
+          padding: 0 8px; /* Aumentamos un poco el padding */
+        }
+
+        .split-container {
+          gap: 0.75rem; /* Reduce aún más el espacio */
+        }
+
+        .section-title {
+          font-size: 1.1rem;
+        }
+
+        .table-wrapper {
+          padding: 0.25rem;
+        }
+
+        .card-form,
+        .recomendacion,
+        .alert,
+        .table-section {
+          padding: 0.75rem;
+          margin-bottom: 0.75rem; /* Reducimos el margen inferior */
+          border-radius: 12px; /* Más reducido para móviles pequeños */
+        }
+
+        /* Optimizaciones para pantallas muy pequeñas */
+        .form-control {
+          padding: 0.5rem;
+          font-size: 0.85rem;
+        }
+
+        /* Hacemos los botones más compactos */
+        .btn {
+          padding: 0.4rem 0.5rem;
+          font-size: 0.8rem;
+        }
+
+        /* Reducimos el tamaño del texto en la tabla */
+        .table {
+          font-size: 0.8rem;
+        }
+
+        .table thead th,
+        .table td {
+          padding: 0.5rem 0.3rem;
+        }
+      }
     </style>
-</head>
-<body>
-    <div layout:fragment="content">
-        <!-- Alertas -->
-        <div th:if="${success}" class="alert alert-success" role="alert">
-            <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+  </head>
+  <body>
+    <div layout:fragment="content" class="content-container">
+      <!-- Alertas -->
+      <div th:if="${success}" class="alert alert-success" role="alert">
+        <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+      </div>
+      <div th:if="${warning}" class="alert alert-warning" role="alert">
+        <i class="bi bi-exclamation-triangle"></i>
+        <span th:text="${warning}"></span>
+      </div>
+      <div th:if="${error}" class="alert alert-danger" role="alert">
+        <i class="bi bi-x-circle"></i> <span th:text="${error}"></span>
+      </div>
+
+      <!-- Estadísticas -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="bi bi-card-text"></i>
+          </div>
+          <div class="stat-value" th:text="${estadisticas.totalTarjetas}">
+            0
+          </div>
+          <div class="stat-label">Total de Tarjetas</div>
         </div>
-        <div th:if="${warning}" class="alert alert-warning" role="alert">
-            <i class="bi bi-exclamation-triangle"></i> <span th:text="${warning}"></span>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="bi bi-lightning"></i>
+          </div>
+          <div
+            class="stat-value"
+            th:text="${estadisticas.tarjetasEstudiadasHoy}"
+          >
+            0
+          </div>
+          <div class="stat-label">Estudiadas Hoy</div>
         </div>
-        <div th:if="${error}" class="alert alert-danger" role="alert">
-            <i class="bi bi-x-circle"></i> <span th:text="${error}"></span>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="bi bi-stars"></i>
+          </div>
+          <div
+            class="stat-value"
+            th:text="${#numbers.formatDecimal(estadisticas.promedioNivelDominio, 1, 1)}"
+          >
+            0.0
+          </div>
+          <div class="stat-label">Nivel Promedio</div>
         </div>
-
-        <!-- Estadísticas -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="bi bi-card-text"></i>
-                </div>
-                <div class="stat-value" th:text="${estadisticas.totalTarjetas}">0</div>
-                <div class="stat-label">Total de Tarjetas</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="bi bi-lightning"></i>
-                </div>
-                <div class="stat-value" th:text="${estadisticas.tarjetasEstudiadasHoy}">0</div>
-                <div class="stat-label">Estudiadas Hoy</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="bi bi-stars"></i>
-                </div>
-                <div class="stat-value" th:text="${#numbers.formatDecimal(estadisticas.promedioNivelDominio, 1, 1)}">0.0</div>
-                <div class="stat-label">Nivel Promedio</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="bi bi-check2-circle"></i>
-                </div>
-                <div class="stat-value" th:text="${estadisticas.porcentajeDominado + '%'}">0%</div>
-                <div class="stat-label">Porcentaje Dominado</div>
-            </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="bi bi-check2-circle"></i>
+          </div>
+          <div
+            class="stat-value"
+            th:text="${estadisticas.porcentajeDominado + '%'}"
+          >
+            0%
+          </div>
+          <div class="stat-label">Porcentaje Dominado</div>
         </div>
+      </div>
 
-        <!-- Recomendación -->
-        <div class="recomendacion" th:if="${tarjetasParaRepasar > 0}">
-            <div class="recomendacion-texto">
-                <i class="bi bi-lightbulb"></i>
-                Tienes <span th:text="${tarjetasParaRepasar}"></span> tarjetas que necesitan repaso
-            </div>
-            <a href="/tarjetas/estudiar" class="btn btn-primary">
-                <i class="bi bi-play-circle"></i> Comenzar a Estudiar
-            </a>
+      <!-- Recomendación -->
+      <div class="recomendacion" th:if="${tarjetasParaRepasar > 0}">
+        <div class="recomendacion-texto">
+          <i class="bi bi-lightbulb"></i>
+          Tienes <span th:text="${tarjetasParaRepasar}"></span> tarjetas que
+          necesitan repaso
         </div>
+        <a href="/tarjetas/estudiar" class="btn btn-primary">
+          <i class="bi bi-play-circle"></i> Comenzar a Estudiar
+        </a>
+      </div>
 
-        <div class="split-container">
-            <!-- Sección Izquierda: Formulario para crear una nueva tarjeta -->
-            <section>
-                <div class="card-form">
-                    <h2 class="section-title">
-                        <i class="bi bi-plus-circle"></i> Nueva Tarjeta
-                    </h2>
-                    <form th:action="@{/tarjetas/guardar}" th:object="${tarjeta}" method="post" id="cardForm">
-                        <div class="mb-4">
-                            <label class="form-label">
-                                <i class="bi bi-question-circle"></i> Pregunta:
-                            </label>
-                            <input type="text" class="form-control" th:field="*{pregunta}" 
-                                   required placeholder="Escribe tu pregunta aquí..."
-                                   minlength="3" maxlength="500">
-                            <small class="text-muted">Mínimo 3 caracteres, máximo 500</small>
-                        </div>
+      <div class="split-container">
+        <!-- Sección Izquierda: Formulario para crear una nueva tarjeta -->
+        <section class="card-form-container">
+          <div class="card-form">
+            <h2 class="section-title">
+              <i class="bi bi-plus-circle"></i> Nueva Tarjeta
+            </h2>
+            <form
+              th:action="@{/tarjetas/guardar}"
+              th:object="${tarjeta}"
+              method="post"
+              id="cardForm"
+            >
+              <div class="mb-4">
+                <label class="form-label">
+                  <i class="bi bi-question-circle"></i> Pregunta:
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  th:field="*{pregunta}"
+                  required
+                  placeholder="Escribe tu pregunta aquí..."
+                  minlength="3"
+                  maxlength="500"
+                />
+                <small class="text-muted"
+                  >Mínimo 3 caracteres, máximo 500</small
+                >
+              </div>
 
-                        <div class="mb-4">
-                            <label class="form-label">
-                                <i class="bi bi-lightbulb"></i> Respuesta:
-                            </label>
-                            <textarea class="form-control" th:field="*{respuesta}" 
-                                    required placeholder="Escribe la respuesta aquí..."
-                                    rows="4" minlength="3" maxlength="1000"></textarea>
-                            <small class="text-muted">Mínimo 3 caracteres, máximo 1000</small>
-                        </div>
+              <div class="mb-4">
+                <label class="form-label">
+                  <i class="bi bi-lightbulb"></i> Respuesta:
+                </label>
+                <textarea
+                  class="form-control"
+                  th:field="*{respuesta}"
+                  required
+                  placeholder="Escribe la respuesta aquí..."
+                  rows="4"
+                  minlength="3"
+                  maxlength="1000"
+                ></textarea>
+                <small class="text-muted"
+                  >Mínimo 3 caracteres, máximo 1000</small
+                >
+              </div>
 
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-save"></i> Guardar Tarjeta
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </section>
+              <div class="text-center">
+                <button type="submit" class="btn btn-success">
+                  <i class="bi bi-save"></i> Guardar Tarjeta
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
 
-            <!-- Sección Derecha: Lista de tarjetas -->
-            <section>
-                <h2 class="section-title">
-                    <i class="bi bi-collection"></i> Mis Tarjetas
-                </h2>
+        <!-- Sección Derecha: Lista de tarjetas -->
+        <section class="card-list-container">
+          <h2 class="section-title">
+            <i class="bi bi-collection"></i> Mis Tarjetas
+          </h2>
 
-                <div th:if="${#lists.isEmpty(tarjetas)}" class="empty-state">
-                    <h3>🎯 ¡Comienza tu Aprendizaje!</h3>
-                    <p class="text-muted">Crea tu primera tarjeta usando el formulario de la izquierda</p>
-                </div>
+          <div th:if="${#lists.isEmpty(tarjetas)}" class="empty-state">
+            <h3>🎯 ¡Comienza tu Aprendizaje!</h3>
+            <p class="text-muted">
+              Crea tu primera tarjeta usando el formulario de la izquierda
+            </p>
+          </div>
 
-                <div th:if="${not #lists.isEmpty(tarjetas)}">
-                    <div class="table-section">
-                        <div class="table-wrapper">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Pregunta</th>
-                                        <th>Nivel</th>
-                                        <th>Última vez</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="tarjeta : ${tarjetas}">
-                                        <td th:text="${#strings.abbreviate(tarjeta.pregunta, 50)}"></td>
-                                        <td>
-                                            <span class="badge" th:classappend="${
+          <div th:if="${not #lists.isEmpty(tarjetas)}">
+            <div class="table-section">
+              <div class="table-wrapper">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Pregunta</th>
+                      <th>Nivel</th>
+                      <th>Última vez</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="tarjeta : ${tarjetas}">
+                      <td
+                        th:text="${#strings.abbreviate(tarjeta.pregunta, 50)}"
+                      ></td>
+                      <td>
+                        <span
+                          class="badge"
+                          th:classappend="${
                                                 tarjeta.nivelDominio <= 1 ? 'bg-danger' :
                                                 tarjeta.nivelDominio <= 3 ? 'bg-warning' :
                                                 'bg-success'}"
-                                                th:text="${tarjeta.nivelDominio + '/5'}">
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <small th:if="${tarjeta.ultimaVezEstudiada != null}" 
-                                                   th:text="${#temporals.format(tarjeta.ultimaVezEstudiada, 'dd/MM/yyyy HH:mm')}">
-                                            </small>
-                                            <small th:if="${tarjeta.ultimaVezEstudiada == null}" 
-                                                   class="text-muted">Nunca</small>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group-card">
-                                                <a th:href="@{/tarjetas/editar/{id}(id=${tarjeta.id})}" 
-                                                   class="btn btn-warning">
-                                                    <i class="bi bi-pencil"></i> Editar
-                                                </a>
-                                                <a th:href="@{/tarjetas/eliminar/{id}(id=${tarjeta.id})}" 
-                                                   class="btn btn-danger"
-                                                   onclick="return confirm('¿Estás seguro de que deseas eliminar esta tarjeta?')">
-                                                    <i class="bi bi-trash"></i> Eliminar
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                          th:text="${tarjeta.nivelDominio + '/5'}"
+                        >
+                        </span>
+                      </td>
+                      <td>
+                        <small
+                          th:if="${tarjeta.ultimaVezEstudiada != null}"
+                          th:text="${#temporals.format(tarjeta.ultimaVezEstudiada, 'dd/MM/yyyy HH:mm')}"
+                        >
+                        </small>
+                        <small
+                          th:if="${tarjeta.ultimaVezEstudiada == null}"
+                          class="text-muted"
+                          >Nunca</small
+                        >
+                      </td>
+                      <td>
+                        <div class="btn-group-card">
+                          <a
+                            th:href="@{/tarjetas/editar/{id}(id=${tarjeta.id})}"
+                            class="btn btn-warning"
+                          >
+                            <i class="bi bi-pencil"></i> <span>Editar</span>
+                          </a>
+                          <a
+                            th:href="@{/tarjetas/eliminar/{id}(id=${tarjeta.id})}"
+                            class="btn btn-danger"
+                            onclick="return confirm('¿Estás seguro de que deseas eliminar esta tarjeta?')"
+                          >
+                            <i class="bi bi-trash"></i> <span>Eliminar</span>
+                          </a>
                         </div>
-                    </div>
-                </div>
-            </section>
-        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
 
     <th:block layout:fragment="scripts">
-        <script>
-            document.getElementById('cardForm').addEventListener('submit', function(e) {
-                const pregunta = this.querySelector('[name="pregunta"]');
-                const respuesta = this.querySelector('[name="respuesta"]');
-                
-                if (pregunta.value.trim().length < 3 || respuesta.value.trim().length < 3) {
-                    e.preventDefault();
-                    if (pregunta.value.trim().length < 3) pregunta.classList.add('shake');
-                    if (respuesta.value.trim().length < 3) respuesta.classList.add('shake');
-                    
-                    setTimeout(() => {
-                        pregunta.classList.remove('shake');
-                        respuesta.classList.remove('shake');
-                    }, 500);
-                }
-            });
-        </script>
+      <script>
+        document
+          .getElementById("cardForm")
+          .addEventListener("submit", function (e) {
+            const pregunta = this.querySelector('[name="pregunta"]');
+            const respuesta = this.querySelector('[name="respuesta"]');
+
+            if (
+              pregunta.value.trim().length < 3 ||
+              respuesta.value.trim().length < 3
+            ) {
+              e.preventDefault();
+              if (pregunta.value.trim().length < 3)
+                pregunta.classList.add("shake");
+              if (respuesta.value.trim().length < 3)
+                respuesta.classList.add("shake");
+
+              setTimeout(() => {
+                pregunta.classList.remove("shake");
+                respuesta.classList.remove("shake");
+              }, 500);
+            }
+          });
+      </script>
     </th:block>
-</body>
+  </body>
 </html>
